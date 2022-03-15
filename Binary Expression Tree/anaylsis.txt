@@ -1,0 +1,22 @@
+void BET::makeEmpty(BET::BinaryNode *&t) {
+    if(t != nullptr)                           1 unit of time for comparison operation
+    {                           
+        makeEmpty(t->leftchild);               n/2 units of time to traverse half of the tree
+        makeEmpty(t->rightchild);              n/2 units of time to traverse other half of the tree
+        delete t;                              1 unit of time to free memory
+    }     
+    t = nullptr;                               1 unit of time for assignment operation
+}
+
+The function has a time complexity of O(n). The function will perform a comparison 2n + 1 times for
+n nodes. Once for the parent, and 2 additional comparisons for each nodes left and right children.
+Each comparison cost 1 unit of time. Inside the conditional block, makeEmpty(t->leftchild) will be
+called n/2 times because it will traverse half of the nodes of the binary expression tree. 
+makeEmpty(t->right) will execute n/2 times as well as it traverses the other half of the nodes. 
+The delete call will execute once for every node in the binary expression tree giving it a total 
+time of n. Finally the passed in node will be assigned nullptr for every node giving it a total
+time of n.
+
+T(n) = (2n+1) + n/2 + n/2 + n + n
+     = 5n + 1
+O(T(n)) = O(n)

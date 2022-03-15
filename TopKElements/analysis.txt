@@ -1,0 +1,168 @@
+Synopsis:
+
+My goal for this assignment was to reduce the time complexity of processing and sorting data as much as possible.
+To do this, I chose an unordered_map as my container. In this program, a string is used as the key and a pair is
+used as the value. The value pair is a pair of integers. The first integer represents the number of occurences of
+the key and the second represents the priority of the key (index of first occurence of a word or number, char
+value in decimal for chars). This container gives constant lookup and insert time; making it the ideal container
+for this problem.
+
+The second issue to be solved is sorting. This solution uses a priority queue with a lambda function for sorting.
+The priority queue will build a min heap to sort the items, giving logn insert and removal times. This method of
+sorting was choosen due to the possibility of two elements having the same number of occurences. In that instance,
+the integer representing the priority acts as a tie breaker. To speed up insert and removals, the priorty queue is
+bound to a size of k elements. This means that the binary tree created by the priority queue will have a max size
+of k. This increases the average time complexity of insert and removals from logn, to logk. For example if the
+program parses 1000 chars and wants the top 10, the binary tree will have a time complexity of log10 for inserting
+and removing since the binary tree will only have at most, 10 elements. After iterating through all elements to
+be sorted, the top k elements are what is left in the priorty queue in accending order. The elements are then
+put in decending order by using the push_front function of a list.
+
+Program Time Complexity Analysis:
+
+The function buildMaps will build 3 unordered_maps; one for words, one from numbers, and one for chars. The function can
+be broken up into 3 sections, one for processing each map. The function starts by taking in a string called in and
+iterating over every char. The worst can scenerio is when every string passed in is a string of length 1 thus, making
+the function have to process data into 2 unordered_maps (the word or number unordered_map, and the char unordered_map)
+in each iteration. This gives the function a worst case runtime of 34n + 6 which has a worst case time complexity of O(n)
+for n = the number of chars to be iterated over.
+
+void TopKElements::buildMaps(const string &in) {
+    string builder;
+        for(size_t i = 0; i < in.length(); i++)                    2n + 2 units of time 1 to initialize, n+1 for comparisions, n for increments
+        {
+            if(isalpha(in[i])) {                                   2 units of time for comparison and indexing into array
+                builder += tolower(in[i]);                         4 units of time for tolower, assignment/addition, and indexing into array
+                if(!isalpha(in[i+1]))                              3 unit of time for comparison, addition, and indexing into array
+                {
+                    if(words.find(builder) == words.end())         3 units of time. 1 for lookup, 1 for end iterator, 1 for comparrison
+                    {
+                        words[builder].second = wordcounter;       2 units of time. 1 for lookup, 1 for assignment
+                    }
+                    words[builder].first++;                        2 units of time. 1 for lookup, 1 for increment
+                    wordcounter++;                                 1 unit of time for increment
+                    builder = "";                                  1 unit of time for assignment
+                }
+            }
+            else if(isdigit(in[i])) {                              2 units of time for comparison and indexing into array
+                builder += tolower(in[i]);                         4 units of time for tolower, assignment/addition, and indexing into array
+                if(!isdigit(in[i+1]))                              3 unit of time for comparison, addition, and indexing into array
+                {
+                    if(numbers.find(builder) == numbers.end())     3 units of time. 1 for lookup, 1 for end iterator, 1 for comparrison
+                    {
+                        numbers[builder].second = wordcounter;     2 units of time. 1 for lookup, 1 for assignment
+                    }
+                    numbers[builder].first++;                      2 units of time. 1 for lookup, 1 for increment
+                    builder = "";                                  1 unit of time for assignment
+                    wordcounter++;                                 1 unit of time for increment
+                }
+            }
+            string str(1, in[i]);                                  2 units of time for construction and indexing into array
+            if(in[i] == ' ')                                       2 units of time for comparison and indexing into array
+            {
+                str = "space";                                     1 unit of time for assignment
+            } else if(in[i] == '\t')                               2 units of time for comparison and indexing into array
+            {
+                str = "\\t";                                       1 unit of time for assignment
+            } else if (in[i] == '\r')                              2 units of time for comparison and indexing into array
+            {
+                str = "\\r";                                       1 unit of time for assignment
+            }
+            chars[str].first++;                                    2 units of time for lookup and increment
+            chars[str].second = int(in[i]);                        3 units of time for lookup, assignment, and indexing into array
+        }
+        chars["\\n"].first++;                                      2 units of time for lookup and increment
+        chars["\\n"].second = 10;                                  2 units of time for lookup and assignment
+}
+
+The function minHeapSort takes in an unordered_map and returns the top k (10 in the case of the assignment) elements.
+The function uses a priority_queue which is bound to a size of k to reduce the logarithmic push and pop times as much
+as possible. Once the priority_queue reaches a size greater than k, the function pops the top element off the top of
+the min heap (the smallest element).To begin, the function iterates across n elements stored in the passed in
+unordered_map. For each element, the function first pushes the element into the priority_queue costing log3k units
+of time to reorder the binary tree. If the priority_queue gets larger than k, the function pops the top costing log3k
+units of time. The function uses a lambda function for sorting the priority_queue. The worst case of this lambda function
+is when two elements have the same number of occurences and have to be sorted by priority costing 3 units of time per
+call. After n iterations, there will be k (10 for the assignment) elements left in the priority queue in accending order.
+To change the result from accending order to decending order, the function iterates over the results and pushes each 
+element in the priority queue into the front of a list costing n units of time for iteration, and 1 unit of time for
+insertion into the list. The worst possible scenerio for this function is when k = n. This gives a worst case runtime
+of 2nlog(3n) + n which has a worst case time complexity of O(nlogn) for n = the number of elements to sort.
+
+list<data_pair> TopKElements::minHeapSort(const mapped_data & map) const{
+    //Lambda function for determining order via occurrence count and priority
+    auto comp = [](const data_pair& a, const data_pair& b)                   
+    {
+        if(a.second.first > b.second.first)                        1 unit of time for comparision
+        {
+            return true;
+        } else if(a.second.first == b.second.first)                1 unit of time for comparision
+        {
+            return a.second.second < b.second.second;              1 unit of time for comparision
+        } else {
+            return false;
+        }
+    };
+    priority_queue<data_pair, vector<data_pair>, decltype(comp)> pq(comp);
+    for(auto & it : map)                                           n units of time
+    {
+        pq.push(it);                                               log3k units of time
+        if(pq.size() > kelements)                                  1 unit of time
+        {
+            pq.pop();                                              log3k units of time
+        }
+    }
+    list<data_pair> results;
+    while(!pq.empty())                                             k units of time
+    {
+        results.push_front(pq.top());                              1 unit of time
+        pq.pop();                                                  log3k units of time
+    }
+    return results;
+}
+
+The function displayData takes in a list and outputs the contents to the display. This is done by iterating over
+the n elements of the passed in list and displaying the front element and popping the front element off the list
+until the list is empty. Each pop_front call has a constant time cost and will occur n times. This gives a runtime
+of 6n+5 which has a time complexity of O(n) for n = the number of elements to print.
+
+void TopKElements::displayData(list<data_pair> topKData) const{
+    cout << left;                                                  1 unit of time
+    cout << setw(8)<< "Index" << setw(10) << "Item" << setw(8) << "Number" << "Priority" << endl;  1 unit of time
+    for(int i = 0; !topKData.empty(); i++)                         2n + 2 units of time 1 to initialize, n+1 for comparisions, n for increments
+    {
+        cout << left;                                              1 unit of time
+        cout << "[" << i << setw(5) << "]" << setw(13) << topKData.front().first <<                  1 unit of time
+        setw(7) << topKData.front().second.first << topKData.front().second.second << endl;          1 unit of time
+        topKData.pop_front();                                      1 unit of time
+    }
+    cout << endl << endl;                                          1 unit of time
+}
+
+The function printTopKData passes each of the 3 unordered_maps to the function minHeapSort (O(nlogn)) and then passes 
+each result to the function displayData (O(n)). The worst case runtime is 6nlog(3n) + 21n + 18 which has a worst case time
+complexity of O(nlogn). Since this function mostly consist of calls to private member functions, we could also look at 
+the max of the function calls MAX(O(nlogn), O(n)) and get the same result of O(nlogn).
+
+void TopKElements::printTopKData() const {
+    cout << "There are " << words.size() << " Unique Words, The Top " << kelements << " Words\n\n";            1 unit of time
+    displayData(minHeapSort(words));                                                                           O(nlogn)
+    cout << "There are " << numbers.size() << " Unique Numbers, The Top " << kelements << " Numbers\n\n";      1 unit of time
+    displayData(minHeapSort(numbers));                                                                         O(nlogn)
+    cout << "There are " << chars.size() << " Unique Characters, The Top " << kelements << " Characters\n\n";  1 unit of time
+    displayData(minHeapSort(chars));                                                                           O(nlogn)
+}
+
+This function is the driver for the class TopKElements. The function initializes an object of type TopKElements with k
+equal to 10 with a constant time complexity. Next, the function gets some x number of lines from the console, passing
+each line to the buildMaps function of the TopKElements object with a time complexity of O(n). Once the unordered_maps
+have been build from all input passed in, the printTopKData function is called having a time complexity of O(nlogn). The
+overall time complexity of this function is MAX(O(1), O(1), O(n), O(nlogn)) which is O(nlogn).
+int main(){
+    TopKElements topk(10);                                         O(1)
+    string input;
+    while(getline(cin, input)) {                                   O(1)
+        topk.buildMaps(input);                                     O(n)
+    }
+    topk.printTopKData();                                          O(nlogn)
+}

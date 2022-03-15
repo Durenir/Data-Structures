@@ -1,0 +1,49 @@
+void List<T>::reverse() {                       No Time
+    if(size() > 1) {                            1 unit of time for a comparison operation
+        Node *current = head;                   1 unit of time for assignment
+        Node *temp = nullptr;                   1 unit of time for initialization
+        while (current != tail) {               N + 1 units of time for while loop through entire calling List
+            temp = current->next;               	N* (1 unit of time for assignment operation)
+            current->next = current->prev;              N* (1 unit of time for assignment operation)
+            current->prev = temp;                       N* (1 unit of time for assignment operation)
+            current = temp;                             N* (1 unit of time for assignment operation)
+        }                                       NoTime
+        current = head;                         1 unit for assignment operation
+        head = tail->prev;                      1 unit for assignment operation
+        tail->prev = current;                   1 unit for assignment operation
+        current->next = tail;                   1 unit for assignment operation
+    }                                           No Time
+}                                               No Time
+
+Lines 2, 3, and 4 will occur once per function call and will count as 1 unit of time each. The while loop will iterate
+across a list of size N and one additional comparision once the loop has reached the tail giving a total of N + 1 units
+of time. Inside the while loop, there are 4 assignment operations, each will be called N times giving a total of 4N
+units of time. After the while loop, 4 more assignment operations give a cost 4 units of time.
+= 4N + (N+1) + 7
+= 5N + 8
+= O(5N + 8)
+= O(N)
+
+void List<T>::remove_if(PREDICATE pred)                   No Time
+{                                                         No Time
+    if(!empty()) {                                        1 unit of time for a comparison operation
+        for (auto itr = begin(); itr != end();) {         N+2 Assignment and comparison operations
+            if (pred(*itr)) {                             	N* (1 unit of time for comparison operation)
+                itr = erase(itr);                         	N* (1 unit of time for assignment + O(erase))
+            } else {                                      	No Time
+                itr++;                                    	N* (1 unit of time for assignment)
+            }                                             	No Time
+        }                                                 No Time
+    }                                                     No Time
+}                                                         No Time
+
+Line 3 contributes 1 unit of time for the comparison operation. Line 4 defines a for loop costing 1 unit of time for an
+assignment and N + 1 units of time for comparisons giving a cost of N + 2. Inside the for loop is an if/else statement.
+The worst case complexity of this condition is if the condition is true for the entire loop. This gives a complexity for the
+conditional of 1 unit of time for the comparison operation on line 5 that will occur N times. Line 6 contributes 1 unit of
+time for the assignment and the complexity of the erase function which is also 1 unit of time. This is performed N times
+giving a cost of 2N units of time for the operations at this line.
+= 1 + (N+2) + N + 2N
+= 4N + 3
+= O(4N + 3)
+= O(N)

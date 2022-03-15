@@ -1,0 +1,39 @@
+void Stack<T>::clear() {                 No time
+    while(!empty())                      N + 1 * O(1) (Loop calls empty() N + 1 times)
+    {                                    No time
+        pop();                           N * O(1) (Loop calls empty N times)
+    }                                    No time
+}                                        No time
+
+bool Stack<T>::empty() const {           No time
+    return theSize == 0;                 1 unit of time for comparison
+}                                        No time
+
+void Stack<T>::pop() {                   No time
+    if(!empty())                         O(1) from function call
+    {                                    No time
+        Node *p = head;                  1 unit of time for initialization
+        if(head->next != tail) {         1 unit of time for comparison
+            head = head->next;           1 unit of time for assignment
+            head->prev = nullptr;        1 unit of time for assignment
+        } else {                         No time
+            tail->prev = nullptr;        1 unit of time for assignment
+        }                                No time
+        delete p;                        1 unit of time for deletion of node
+        theSize--;                       1 unit of time for decrement.
+    }                                    No time
+}                                        No time
+
+The clear() function calls pop() while the stack is not empty(). The empty function is T(N) = 1
+which gives a time complexity of O(1). The pop() functions worst case scenerio is T(N) = 6 + O(1)
+which gives a time complexity of O(6 + 1) which simplifies to O(1). Clear() calls empty() N + 1
+times to determine if the stack is empty (once for each element in the stack and one final call
+that will flag the stack as being empty). Since the while loop is entered N times, pop() will be
+called N times giving a total of N * O(1). This gives a total of: 
+
+T(N) = (N + 1 * O(1)) + (N * O(1))
+     = O(N + 1) + O(N)
+     = O(2N + 1)
+     = O(N)
+Therefore, runtime complexity of clear() is O(N).
+
